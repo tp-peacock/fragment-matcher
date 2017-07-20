@@ -2,7 +2,6 @@
 import sys
 import argparse
 from time import time
-from IPython import embed
 
 def args():
 	parser = argparse.ArgumentParser( description='** script to find overlaps between fragments of TCR sequence and rebuild complete sequences. **')
@@ -16,9 +15,6 @@ def getFilename():
 
 def getSequences(file):
 	return [line.rstrip() for line in open(file, "r")] # will possibly need to modify as a loop, if file format has more than just sequences
-
-# def sliceSeq(seq, length, index, extension):
-# 	return seq[index : index + length + extension]
 
 def flatten(l):
   return [item for sublist in l for item in sublist]
@@ -90,15 +86,11 @@ def storeSummary(overlaps, sequence, index):
 if __name__ == '__main__':
 	start_time = time()
 	args = args()
-	if not args.filename: args.filename = getFilename() 
+	if not args.filename: args.filename = getFilename()  # possibly build function to validate file
 
-	#filename = getFilename() # possibly build function to validate file
 	sequences = getSequences(args.filename)
-
-	# for i in range(len(sequences)):
-	# 	subseqtree = partition(sequences[i],args.minoverlap)
-	# 	matches = searchAll(subseqtree,i,sequences)
 	stored_summaries = []
+	
 	for i in range(len(sequences)):
 		subseqtree = partition(sequences[i],args.minoverlap)
 		overlaps = searchAll(subseqtree,i,sequences)

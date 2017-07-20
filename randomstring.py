@@ -3,7 +3,6 @@ import sys
 import random, string
 import argparse
 from time import time
-from IPython import embed
 
 def args():
 	parser = argparse.ArgumentParser( description='** generates file of random strings, pairs of matching strings, matching strings with deleted characters **')
