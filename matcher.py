@@ -83,9 +83,9 @@ def storeSummary(overlaps, sequence, index):
 	else:
 		return None
 
-if __name__ == '__main__':
+def main(args):
 	start_time = time()
-	args = args()
+	
 	if not args.filename: args.filename = getFilename()  # possibly build function to validate file
 
 	sequences = getSequences(args.filename)
@@ -108,5 +108,9 @@ if __name__ == '__main__':
 		print "Output written to",args.outputfile
 
 	print "matching complete after ", (time() - start_time)
-	
+
+
+if __name__ == '__main__':
+	args = args()
+	main(args)
 	sys.exit()
