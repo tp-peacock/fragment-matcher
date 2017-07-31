@@ -8,7 +8,7 @@ def args():
 	parser.add_argument('-f', '--filename', type=str, help='File of sequences to be analysed', required=False)
 	parser.add_argument('-mo', '--minoverlap', type=int, help='Minimum length of an overlap', required=False, default=5)
 	parser.add_argument('-o', '--outputfile', type=str, help='Write summary to output file', required=False)
-	return parser.parse_args()
+	return parser
 
 def getFilename():
 		return raw_input("Please enter the name of the file you wish to analyse: ")
@@ -111,6 +111,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-	args = args()
+	parser = args()
+	args = parser.parse_args()
 	main(args)
 	sys.exit()
