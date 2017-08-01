@@ -61,11 +61,11 @@ def printSummary(overlaps, sequence, index):
 		for k in range(len(overlaps)):
 			print getSummary(overlaps,sequence,index, k)
 	elif len(overlaps) > 1:
-		print "-------------------------------------------------------------------"
+		print "---------------------------------------------------------------------------"
 		print "Warning! Multiple overlaps found for same sequence!\n"
 		for k in range(len(overlaps)):
 			print getSummary(overlaps,sequence,index, k)
-		print "-------------------------------------------------------------------"	
+		print "---------------------------------------------------------------------------"	
 
 def storeSummary(overlaps, sequence, index):
 	summary = []
@@ -74,11 +74,11 @@ def storeSummary(overlaps, sequence, index):
 			summary.append(getSummary(overlaps,sequence,index, k))
 			return summary
 	elif len(overlaps) > 1:
-		summary.append("-------------------------------------------------------------------\n")
+		summary.append("---------------------------------------------------------------------------\n")
 		summary.append("Warning! Multiple overlaps found for same sequence!\n\n")
 		for k in range(len(overlaps)):
 			summary.append(getSummary(overlaps,sequence,index, k))
-		summary.append("-------------------------------------------------------------------\n\n")
+		summary.append("---------------------------------------------------------------------------\n\n")
 		return summary
 	else:
 		return None
