@@ -1,3 +1,4 @@
+import os
 import sys
 import matcher
 import argparse
@@ -6,7 +7,7 @@ from IPython import embed
 def addargs(parser):
 	parser.add_argument('-nc', '--nocollapse', action='store_true', help='Prevents sequences being with same tag being collapsed into longest possible sequence', required=False, default=False)
 	parser.add_argument('-nr', '--noreconstruct', action='store_true', help='Prevents reconstruct of collapsed sequences into full TCRs', required=False, default=False)
-	parser.add_argument('-s', '--separate', action='store_true', help='Separate tags into separate files', required=False, default=False)	
+	parser.add_argument('-s', '--separatedir', type=str, help='Name of directory in which to store tags separated into unique files', required=False)	
 	parser.add_argument('-c', '--chains', type=str, help='Specify chains if known', nargs='*', required=False, default=['a','b','c','d'])
 	return parser
 
@@ -15,6 +16,41 @@ def argchecker():
 	if args.nocollapse and not args.noreconstruct:
 		print "Warning: It is inadivsable to reconstruct TCRs if input sequences have not been collapsed.\n" \
 			  "Only use the '-nc' argument if input sequences have already been collapsed.\n"
+
+def separateIntoFiles():
+	chain_names = {"a": "alpha", "b": "beta", "g": "gamma", "d": "delta"}
+	parent = args.separatedir
+	if not os.path.exists(parent):
+		os.makedirs(parent)
+	else:
+		overwrite = raw_input("Warning! Directory '"+parent+"' already exists. Do you wish to overwrite? (Y/N): ")
+
+	if overwrite not in ["Y","y","yes"]:
+		print "Directory '"+parent+"' was not overwritten. Program will now exit."
+		sys.exit()
+
+	for tag in separated_seqs.keys():
+		
+		for chain in separated_seqs[tag].keys():
+			if separated_seqs[tag][chain]:
+				if chain in chain_names:
+					dir_name = parent+"/"+chain_names[chain]
+				else:
+					dir_name = chain
+				if not os.path.exists(dir_name):
+					os.makedirs(dir_name)
+
+				for gene in separated_seqs[tag][chain]:
+					tag_file = dir_name+"/"+tag+gene
+					file = open(tag_file,'w')
+					for dcr in separated_seqs[tag][chain][gene]:
+						file.write(dcr)
+					file.close()
+
+
+
+	print "Separated files can be found in", parent
+
 
 def specifiedChain(chain):
 	if chain in args.chains:
@@ -203,8 +239,9 @@ if __name__ == '__main__':
 
 	separated_seqs = {'v': v_tags, 'j': j_tags, 'vj': double_tags}
 
-	if args.separate:
+	if args.separatedir:
 		print "Unfinished: program does not yet fully support separation\n" #separate tags here
+		separateIntoFiles()
 
 	if not args.nocollapse:
 		longest_seqs = {}
