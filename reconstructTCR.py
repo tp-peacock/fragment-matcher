@@ -20,14 +20,14 @@ def argchecker():
 def separateIntoFiles():
 	chain_names = {"a": "alpha", "b": "beta", "g": "gamma", "d": "delta"}
 	parent = args.separatedir
+
 	if not os.path.exists(parent):
 		os.makedirs(parent)
 	else:
 		overwrite = raw_input("Warning! Directory '"+parent+"' already exists. Do you wish to overwrite? (Y/N): ")
-
-	if overwrite not in ["Y","y","yes"]:
-		print "Directory '"+parent+"' was not overwritten. Program will now exit."
-		sys.exit()
+		if overwrite not in ["Y","y","yes"]:
+			print "Directory '"+parent+"' was not overwritten. Program will now exit."
+			sys.exit()
 
 	for tag in separated_seqs.keys():
 		
@@ -46,8 +46,6 @@ def separateIntoFiles():
 					for dcr in separated_seqs[tag][chain][gene]:
 						file.write(dcr)
 					file.close()
-
-
 
 	print "Separated files can be found in", parent
 
@@ -240,7 +238,6 @@ if __name__ == '__main__':
 	separated_seqs = {'v': v_tags, 'j': j_tags, 'vj': double_tags}
 
 	if args.separatedir:
-		print "Unfinished: program does not yet fully support separation\n" #separate tags here
 		separateIntoFiles()
 
 	if not args.nocollapse:
