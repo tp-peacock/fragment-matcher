@@ -179,12 +179,13 @@ def findMatches():
 			for key in longest_seqs[tag_type[0]][chain].keys():
 
 				seq = longest_seqs[tag_type[0]][chain][key]
-				searchseqs = [seq] + longest_seqs[tag_type[1]][chain].values()
-				subseqtree = matcher.partition(seq,args.minoverlap)
-				overlaps = matcher.searchAll(subseqtree,0,searchseqs)
-				search_index = chain+tag_type[0]+key
-				target_indicies = getTargetIndicies(overlaps, chain, tag_type[1], longest_seqs[tag_type[1]][chain], searchseqs)
-				match = matcher.storeSummary(overlaps,searchseqs,0)
+				if chain in longest_seqs[tag_type[1]].keys():
+					searchseqs = [seq] + longest_seqs[tag_type[1]][chain].values()
+					subseqtree = matcher.partition(seq,args.minoverlap)
+					overlaps = matcher.searchAll(subseqtree,0,searchseqs)
+					search_index = chain+tag_type[0]+key
+					target_indicies = getTargetIndicies(overlaps, chain, tag_type[1], longest_seqs[tag_type[1]][chain], searchseqs)
+					match = matcher.storeSummary(overlaps,searchseqs,0)
 				
 				if match:
 					summary.append(annotateSummary(match,search_index,target_indicies))
