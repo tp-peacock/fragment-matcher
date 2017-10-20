@@ -2,13 +2,13 @@ import os
 import sys
 import matcher
 import argparse
-from IPython import embed
 
 def addargs(parser):
 	parser.add_argument('-nc', '--nocollapse', action='store_true', help='Prevents sequences being with same tag being collapsed into longest possible sequence', required=False, default=False)
 	parser.add_argument('-nr', '--noreconstruct', action='store_true', help='Prevents reconstruct of collapsed sequences into full TCRs', required=False, default=False)
 	parser.add_argument('-s', '--separatedir', type=str, help='Name of directory in which to store tags separated into unique files', required=False)	
 	parser.add_argument('-c', '--chains', type=str, help='Specify chains if known', nargs='*', required=False, default=['a','b','c','d'])
+	parser.add_argument('-bfd', '--buildfordecombinator', action='store_true', help='Build output files that has format that can be passed into classic Decombinator', required=False)	
 	return parser
 
 def argchecker():
@@ -150,7 +150,6 @@ def getTargetIndicies(overlaps, chain, tag, dictionary, searchseqs):
 	return target_indicies
 
 def annotateSummary(match, search_index, target_indicies):
-
 	if len(match) == 1:
 		match_range = range(1)
 		ishift = 0
@@ -160,8 +159,8 @@ def annotateSummary(match, search_index, target_indicies):
 
 	for i in match_range:
 		splitmatch = match[i].split("\n")
-		old_search_index = splitmatch[0][0]
-		old_target_index = splitmatch[1][0]
+		old_search_index = splitmatch[0].split(",")[0]
+		old_target_index = splitmatch[1].split(",")[0]
 		splitmatch[0] = splitmatch[0].replace(old_search_index,search_index)
 		splitmatch[1] = splitmatch[1].replace(old_target_index,target_indicies[i-ishift])
 		newrecord = "\n".join(splitmatch)
@@ -197,7 +196,7 @@ def printDuplicates(summary):
 			for j in range(len(summary[i])):
 				print summary[i][j]
 
-def writeSummary(summary):
+def summaryForFile(summary):
 	summary_for_file = []
 	
 	for i in range(len(summary)):
@@ -205,16 +204,40 @@ def writeSummary(summary):
 			summary_for_file.append(summary[i])
 		else:
 			summary_for_file.append(summary[i][2:len(summary[i])-1])
+
+	return summary_for_file
+
+def writeSummary(summary):
 	
-		file = open(args.outputfile,'w')
-		file.write("".join(matcher.flatten(summary_for_file)))
-		file.close()
+	summary_for_file = summaryForFile(summary)
+	
+	file = open(args.outputfile,'w')
+	file.write("".join(matcher.flatten(summary_for_file)))
+	file.close()
 
 	printDuplicates(summary)
 	if summary:
 		print "Output written to",args.outputfile
 	else:
 		print "No matches found!"
+
+def buildForDecombinator(summary):
+	summary = matcher.flatten(summaryForFile(summary))
+	fqname = "bfd_"+args.filename.split(".")[0]+".fastq"
+	fastq = open(fqname, "w")
+
+	for i in range(len(summary)):
+		line = summary[i].split("\n")
+		reconseq = line[3]
+		vtag  = line[0].split(",")[0]
+		jtag  = line[1].split(",")[0]
+		dummymachine = "@"+vtag+jtag
+		dummyqual = "x"*len(reconseq)
+
+		decombuild = dummymachine+"\n"+reconseq+"\n"+"+\n"+dummyqual+"\n"
+		fastq.write(decombuild)
+	print "Decombinator input build saved to "+fqname+". NOTE: file may contain multiple chains."
+	fastq.close()
 	
 def printSummary(summary):
 	print "---------------------------------------------------------------------------"
@@ -225,6 +248,24 @@ def printSummary(summary):
 			print summary[i][j]
 	if not summary:
 		print "No matches found!"
+
+
+
+def cluster(separated_seqs):
+
+	for i in range(len(separated_seqs.keys())):
+		gene = separated_seqs.keys()[i]
+		geneset = separated_seqs[gene]
+		for j in range(len(geneset.keys())):
+			chain = geneset.keys()[j]
+			chainset = geneset[chain]
+			for k in range(len(chainset.keys())):
+				tag = chainset.keys()[k]
+				tagset = chainset[tag]
+				seqs = [dcr.split(", ")[4] for dcr in tagset]
+				if gene=="v":
+					print "UNFINISHED"
+
 	
 if __name__ == '__main__':
 	 
@@ -241,9 +282,12 @@ if __name__ == '__main__':
 	if args.separatedir:
 		separateIntoFiles()
 
+#	cluster(separated_seqs)
+
 	if not args.nocollapse:
 		longest_seqs = {}
 		for tag_type in separated_seqs.keys():
+
 			longest_seqs[tag_type] = collapseTag(separated_seqs[tag_type], tag_type)
 	
 	if not args.noreconstruct:
@@ -253,5 +297,8 @@ if __name__ == '__main__':
 			writeSummary(summary)
 		else:
 			printSummary(summary)
+
+		if args.buildfordecombinator:
+			buildForDecombinator(summary)
 
 	sys.exit()
