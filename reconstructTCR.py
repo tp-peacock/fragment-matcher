@@ -223,7 +223,7 @@ def writeSummary(summary):
 
 def buildForDecombinator(summary):
 	summary = matcher.flatten(summaryForFile(summary))
-	fqname = "bfd_"+args.filename.split(".")[0]+".fastq"
+	fqname = os.path.dirname(file) + "/bfd_" + os.path.splitext(os.path.basename(file))[0] + ".fastq"
 	fastq = open(fqname, "w")
 
 	for i in range(len(summary)):
